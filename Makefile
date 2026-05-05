@@ -8,7 +8,7 @@ vet: fmt
 	go vet ./...
 
 build: vet
-	go build
+	go build -o GoREST ./cmd/web/.
 
 clean:
 	go clean
