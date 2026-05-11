@@ -1,25 +1,62 @@
 package main
 
 import (
-	"log"
+	"database/sql"
+	"flag"
+	"log/slog"
 	"net/http"
+	"os"
 )
+
+type application struct {
+	logger *slog.Logger
+}
 
 const port string = ":8181"
 
 func main() {
 
-	mux := http.NewServeMux()
+	addr := flag.String("addr", port, "HTTP network address")
+	flag.Parse()
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	// This logger will show the source file and line of code of where the log
+	// was generated. I see usefulness for debugging.
+	// logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	// 	AddSource: true,
+	// }))
 
-	mux.HandleFunc("GET /{$}", getHome)
-	mux.HandleFunc("GET /snippet/view/{id}", getSnippetView)
-	mux.HandleFunc("GET /snippet/create", getSnippetCreate)
-	mux.HandleFunc("POST /snippet/create", postSnippetCreate)
+	db, err := sql.Open("mysql", "web:pass@snippetbox?parseTime=true")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 
-	log.Println("server running on localhost", port)
-	err := http.ListenAndServe(port, mux)
-	log.Fatal(err)
+	defer db.Close()
+
+	app := &application{
+		logger: logger,
+		// Could also just do this:
+		// logger: slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	}
+
+	logger.Info("Server starting on localhost", slog.String("addr", *addr))
+	err = http.ListenAndServe(*addr, app.routes())
+	logger.Error(err.Error())
+	os.Exit(1)
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	return db, nil
 }

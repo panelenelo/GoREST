@@ -2,12 +2,11 @@ package main
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
-func getHome(w http.ResponseWriter, r *http.Request) {
+func (app *application) getHome(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 
 	files := []string{
@@ -19,21 +18,23 @@ func getHome(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		// Log the error.
-		log.Print(err.Error())
+		// app.logger.Error(err.Error(), slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()))
 		// Send internal server error to user.
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 		return
 	}
 
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "internal Server Error", http.StatusInternalServerError)
+		// app.logger.Error(err.Error(), slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()))
+		// http.Error(w, "internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 	}
 
 }
 
-func getSnippetView(w http.ResponseWriter, r *http.Request) {
+func (app *application) getSnippetView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -45,11 +46,11 @@ func getSnippetView(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(message))
 }
 
-func getSnippetCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) getSnippetCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Form for creating a snippet"))
 }
 
-func postSnippetCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) postSnippetCreate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("creating new snippet..."))
 }
