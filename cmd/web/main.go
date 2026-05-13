@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
@@ -17,6 +19,7 @@ const port string = ":8181"
 func main() {
 
 	addr := flag.String("addr", port, "HTTP network address")
+	dsn := flag.String("dsn", "web:MangoPass32@/snippetbox?parseTime=true", "snippets")
 	flag.Parse()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -26,7 +29,7 @@ func main() {
 	// 	AddSource: true,
 	// }))
 
-	db, err := sql.Open("mysql", "web:pass@snippetbox?parseTime=true")
+	db, err := openDB(*dsn)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
