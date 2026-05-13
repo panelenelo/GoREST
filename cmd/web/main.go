@@ -7,11 +7,14 @@ import (
 	"net/http"
 	"os"
 
+	"GoREST/internals/models"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
-	logger *slog.Logger
+	logger   *slog.Logger
+	snippets *models.SnippetModel
 }
 
 const port string = ":8181"
@@ -38,9 +41,8 @@ func main() {
 	defer db.Close()
 
 	app := &application{
-		logger: logger,
-		// Could also just do this:
-		// logger: slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		logger:   logger, // Could also just do this{logger: slog.New(slog.NewJSONHandler(os.Stdout, nil))}
+		snippets: &models.SnippetModel{DB: db},
 	}
 
 	logger.Info("Server starting on localhost", slog.String("addr", *addr))
