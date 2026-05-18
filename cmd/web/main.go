@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,8 +14,9 @@ import (
 )
 
 type application struct {
-	logger   *slog.Logger
-	snippets *models.SnippetModel
+	logger        *slog.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 const port string = ":8181"
@@ -40,9 +42,16 @@ func main() {
 
 	defer db.Close()
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := &application{
-		logger:   logger, // Could also just do this{logger: slog.New(slog.NewJSONHandler(os.Stdout, nil))}
-		snippets: &models.SnippetModel{DB: db},
+		logger:        logger, // Could also just do this{logger: slog.New(slog.NewJSONHandler(os.Stdout, nil))}
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
 	}
 
 	logger.Info("Server starting on localhost", slog.String("addr", *addr))

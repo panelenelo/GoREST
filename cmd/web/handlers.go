@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -19,7 +18,13 @@ func (app *application) getHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
+
+	app.render(w, r, http.StatusOK, "home.html", data)
+
+	// Code not needed after creating the page cache.
+	/*files := []string{
 		"./ui/html/base.html",
 		"./ui/html/pages/home.html",
 		"./ui/html/partials/nav.html",
@@ -44,7 +49,7 @@ func (app *application) getHome(w http.ResponseWriter, r *http.Request) {
 		// app.logger.Error(err.Error(), slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()))
 		// http.Error(w, "internal Server Error", http.StatusInternalServerError)
 		app.serverError(w, r, err)
-	}
+	}*/
 
 }
 
@@ -54,6 +59,7 @@ func (app *application) getSnippetView(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+
 	snippet, err := app.snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -64,7 +70,12 @@ func (app *application) getSnippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
+	data := app.newTemplateData(r)
+	data.Snippet = snippet
+
+	app.render(w, r, http.StatusOK, "view.html", data)
+
+	/*files := []string{
 		"./ui/html/base.html",
 		"./ui/html/partials/nav.html",
 		"./ui/html/pages/view.html",
@@ -83,7 +94,8 @@ func (app *application) getSnippetView(w http.ResponseWriter, r *http.Request) {
 	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		app.serverError(w, r, err)
-	}
+	}*/
+
 }
 
 func (app *application) getSnippetCreate(w http.ResponseWriter, r *http.Request) {
