@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 )
 
@@ -117,5 +118,23 @@ func (it *IntTree) Contains(val int) bool {
 }
 
 func main() {
-	test6()
+	dsn, addr := parseFlags()
+
+	fmt.Printf("see things:%s\naddr: %s\n", dsn, addr)
+}
+
+func parseFlags() (string, string) {
+	addr := flag.String("addr", "portMango", "HTTP network address")
+
+	dbName := flag.String("dbName", "mango1", "DB name")
+	dbPort := flag.String("dbPort", "mango2", "DB port")
+	dbHost := flag.String("dbHost", "mango3", "DB host address")
+	dbUser := flag.String("dbUser", "mango4", "DB User")
+	dbPass := flag.String("dbPass", "mango5", "DB password")
+	flag.Parse()
+
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable connect_timeout=5", *dbHost, *dbPort, *dbUser, *dbPass, *dbName)
+	*addr = fmt.Sprintf(":%s", *addr)
+
+	return dsn, *addr
 }
