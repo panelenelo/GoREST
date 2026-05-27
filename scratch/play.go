@@ -117,10 +117,20 @@ func (it *IntTree) Contains(val int) bool {
 	}
 }
 
-func main() {
-	dsn, addr := parseFlags()
+type testc struct {
+	num int64
+}
 
-	fmt.Printf("see things:%s\naddr: %s\n", dsn, addr)
+func main() {
+
+	x := testc{
+		num: 12,
+	}
+	y := testc{}
+
+	fmt.Println(x.num)
+	fmt.Println(y.num)
+
 }
 
 func parseFlags() (string, string) {
