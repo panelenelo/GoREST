@@ -119,17 +119,21 @@ func (it *IntTree) Contains(val int) bool {
 
 type testc struct {
 	num int64
+	stg string
 }
 
 func main() {
 
-	x := testc{
-		num: 12,
-	}
-	y := testc{}
+	var yp []testc
 
-	fmt.Println(x.num)
-	fmt.Println(y.num)
+	for i := 0; i <= 3; i++ {
+		var vi testc
+		vi.num = 2
+		vi.stg = "mango"
+		yp = append(yp, vi)
+	}
+
+	fmt.Print(yp)
 
 }
 
