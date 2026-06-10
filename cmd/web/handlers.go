@@ -9,13 +9,14 @@ import (
 	"unicode/utf8"
 
 	"GoREST/internals/models"
+	"GoREST/internals/validator"
 )
 
 type snippetCreateForm struct {
-	Title       string
-	Content     string
-	Expires     int
-	FieldErrors map[string]string
+	Title   string
+	Content string
+	Expires int
+	validator.Validator
 }
 
 func (app *application) getHome(w http.ResponseWriter, r *http.Request) {
